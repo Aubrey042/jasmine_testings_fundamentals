@@ -159,3 +159,16 @@ describe("A spy", function() {
   });
 });
 
+describe("A spy when created manually", function(){ 
+  let whatAmI;
+  
+  beforeEach(function() {
+    whatAmI = jasmine.createSpy('whatAmI');
+    whatAmI("I","am","a","spy");
+  });
+
+  it("tracks that the spy was called", function() {
+    expect(whatAmI).toHaveBeenCalled();
+  });
+});
+
