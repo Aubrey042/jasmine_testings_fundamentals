@@ -62,6 +62,20 @@ describe("A spec", function() {
   });
 });
 
+describe("A spec using the fail function", function() {
+  function foo(x, callBack) {
+    if (x){
+      callBack();
+    }
+  };
+
+  it("should not call the callBack", function(){
+    foo(false, function() {
+      fail("Callback has been called");
+    });
+  });
+});
+
 describe("A spec", function() {
   let foo;
 
@@ -75,6 +89,10 @@ describe("A spec", function() {
   });
 
   it("is just a function, so it can contain any code", function() {
+    expect(foo).toEqual(1);
+  });
+
+  it("can have more than one expectation", function() {
     expect(foo).toEqual(1);
     expect(true).toEqual(true);
   });
@@ -319,5 +337,95 @@ describe("custom asymmetry", function() {
     });
   });
 });
+
+describe("Manually ticking the Jasmine Clock", function() {
+  let timerCallback;
+
+  beforeEach(function() {
+    timerCallback = jasmine.createSpy("timerCallback");
+    jasmine.clock().install();
+  });
+
+  afterEach(function() {
+    jasmine.clock().uninstall();
+  });
+
+  it("causes a timeout to be called synchronously", function() {
+    setTimeout(function() {
+      timerCallback();
+    }, 100);
+
+    expect(timerCallback).not.toHaveBeenCalled();
+
+    jasmine.clock().tick(101);
+
+    expect(timerCallback).toHaveBeenCalled();
+  });
+
+  it("causes an interval to be called synchronously", function() {
+    setInterval(function() {
+      timerCallback();
+    }, 100);
+
+    expect(timerCallback).not.toHaveBeenCalled();
+
+    jasmine.clock().tick(101);
+    expect(timerCallback.calls.count()).toEqual(1);
+    jasmine.clock().tick(50);
+    expect(timerCallback.calls.count()).toEqual(1);
+
+    jasmine.clock().tick(50);
+    expect(timerCallback.calls.count()).toEqual(2);
+  });
+
+  describe("Mocking the Date object", function(){
+    it("mocks the Date object and sets it to a given time", function() {
+        const baseTime = new Date(2013, 9, 23);
+        jasmine.clock().mockDate(baseTime);
+
+        jasmine.clock().tick(50);
+        expect(new Date().getTime()).toEqual(baseTime.getTime() + 50);
+    });
+});
+});
+
+xdescribe("Using async/await", function() {
+  beforeEach(async function() {
+      await soon();
+      value = 0;
+  });
+  it("should support async execution of test preparation and expectations", async function() {
+      await soon();
+      value++;
+      expect(value).toBeGreaterThan(0);
+  });
+});
+
+xdescribe("long asynchronous specs", function() {
+  beforeEach(async function() {
+      await somethingSlow();
+  }, 1000);
+
+  it("takes a long time", async function() {
+    await somethingReallySlow();
+  }, 10000);
+
+  afterEach(async function() {
+    await somethingSlow();
+    }, 1000);
+    function soon() {
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                resolve();
+            }, 1);
+        });
+    
+      }
+});
+
+
+
+
+
 
 
